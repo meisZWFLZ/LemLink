@@ -1,12 +1,9 @@
-import {
-  GithubPackageResolver,
-  type GithubPackageVersion,
-} from "./packages/github";
+import { GithubPackageResolver, type GithubPackageVersion } from ".";
 import AdmZip from "adm-zip";
 import { Octokit } from "octokit";
 import { SemVer } from "semver";
 
-test("download package and check contents", async () => {
+test("download github package and check contents", async () => {
   const pack = await new GithubPackageResolver(new Octokit()).resolvePackage({
     owner: "lemlib",
     repo: "lemlib",
@@ -27,4 +24,4 @@ test("download package and check contents", async () => {
   const entries = zipFile.getEntries().map((e) => e.entryName);
 
   expect(entries).toHaveLength(4);
-});
+}, 30000); // Increase the timeout value to 10000ms (10 seconds)
