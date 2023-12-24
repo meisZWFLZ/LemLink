@@ -1,42 +1,15 @@
 import { eq as verEquals, type Range, type SemVer } from "semver";
 
-export interface PackageIdentifier {
-  /**
-   * does not include @ sign
-   * @example lemlib
-   */
-  readonly owner: string;
-  /**
-   * @example lemlink
-   */
-  readonly repo: string;
-}
-
-export abstract class PackageVersion implements PackageIdentifier {
-  readonly owner: string;
-  readonly repo: string;
+export abstract class PackageVersion<ID> {
   public constructor(
-    packId: PackageIdentifier,
+    public readonly id: ID,
     public readonly version: SemVer,
-  ) {
-    this.owner = packId.owner;
-    this.repo = packId.repo;
-  }
+  ) {}
   public abstract download(): Promise<Buffer | undefined>;
 }
 
-export abstract class Package<
-  V extends PackageVersion,
-  ID extends PackageIdentifier,
-> implements PackageIdentifier
-{
-  public readonly owner: string;
-  public readonly repo: string;
-
-  constructor(id: ID) {
-    this.owner = id.owner;
-    this.repo = id.repo;
-  }
+export abstract class Package<ID, V extends PackageVersion<ID>> {
+  constructor(public readonly id: ID) {}
 
   public abstract getVersions(): Promise<V[]>;
   public abstract getLatest(): Promise<V | null>;
@@ -60,7 +33,8 @@ export abstract class Package<
 }
 
 export abstract class PackageResolver<
-  P extends Package<PackageVersion, PackageIdentifier>,
+  ID,
+  P extends Package<ID, PackageVersion<ID>>,
 > {
-  public abstract resolvePackage(id: PackageIdentifier): Promise<P | null>;
+  public abstract resolvePackage(id: ID): Promise<P | null>;
 }

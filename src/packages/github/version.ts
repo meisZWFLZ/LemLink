@@ -1,12 +1,15 @@
 import { type Octokit } from "octokit";
-import { PackageVersion, type PackageIdentifier } from "../package";
+import { PackageVersion } from "../package";
 import { type SemVer, parse } from "semver";
-import { type GithubPackageReleaseData } from "./package";
+import {
+  type GithubPackageIdentifier,
+  type GithubPackageReleaseData,
+} from "./package";
 
-export class GithubPackageVersion extends PackageVersion {
+export class GithubPackageVersion extends PackageVersion<GithubPackageIdentifier> {
   protected constructor(
     protected readonly client: Octokit,
-    public readonly packId: PackageIdentifier,
+    packId: GithubPackageIdentifier,
     public readonly data: GithubPackageReleaseData,
     version: SemVer,
   ) {
@@ -15,7 +18,7 @@ export class GithubPackageVersion extends PackageVersion {
 
   public static create(
     client: Octokit,
-    packId: PackageIdentifier,
+    packId: GithubPackageIdentifier,
     data: GithubPackageReleaseData,
   ): GithubPackageVersion | null {
     const version = parse(data.tag_name);
@@ -31,8 +34,8 @@ export class GithubPackageVersion extends PackageVersion {
     const index = this.getAssetIndex();
 
     const res = await this.client.rest.repos.getReleaseAsset({
-      repo: this.packId.repo,
-      owner: this.packId.owner,
+      repo: this.id.repo,
+      owner: this.id.owner,
       asset_id: this.data.assets[index].id,
       headers: { accept: "application/octet-stream" },
     });

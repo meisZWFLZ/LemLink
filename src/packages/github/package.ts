@@ -1,18 +1,30 @@
 import { type Octokit } from "octokit";
-import { Package, type PackageIdentifier } from "../package";
+import { Package } from "../package";
 import { GithubPackageVersion } from "./version";
+
+export interface GithubPackageIdentifier {
+  /**
+   * does not include @ sign
+   * @example lemlib
+   */
+  readonly owner: string;
+  /**
+   * @example lemlink
+   */
+  readonly repo: string;
+}
 
 export type GithubPackageReleaseData = Awaited<
   ReturnType<Octokit["rest"]["repos"]["listReleases"]>
 >["data"][number];
 
 export class GithubPackage extends Package<
-  GithubPackageVersion,
-  PackageIdentifier
+  GithubPackageIdentifier,
+  GithubPackageVersion
 > {
   constructor(
     protected readonly client: Octokit,
-    protected readonly id: PackageIdentifier,
+    id: GithubPackageIdentifier,
   ) {
     super(id);
   }
