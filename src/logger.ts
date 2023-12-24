@@ -1,49 +1,51 @@
-/** specifies severity of a log message */
+/** Specifies severity of a log message */
 export enum LOG_LEVEL {
-  /** verbose description */
+  /** Verbose description */
   VERBOSE,
-  /** debug description */
+  /** Debug description */
   DEBUG,
-  /** info description */
+  /** Info description */
   INFO,
-  /** warning description */
+  /** Warning description */
   WARNING,
-  /** error description */
+  /** Error description */
   ERROR,
-  /** fatal description */
+  /** Fatal description */
   FATAL,
 }
 /**
  * Represents the a message for the {@linkcode ExternalLogger}
- * @template Source where did this message come from?
+ *
+ * @template Source Where did this message come from?
  */
 export interface LogMessage<Source extends string> {
-  /** where did this message come from? */
+  /** Where did this message come from? */
   source: Source;
-  /** the severity of the message */
+  /** The severity of the message */
   level: LOG_LEVEL;
-  /** the actual message */
+  /** The actual message */
   msg: string;
 }
 
 /**
  * What's a sink?
  *
- * Well you can kind of think of a Sink as an {@link https://nodejs.org/en/learn/asynchronous-work/the-nodejs-event-emitter EventEmitter}.
+ * Well you can kind of think of a Sink as an
+ * {@link https://nodejs.org/en/learn/asynchronous-work/the-nodejs-event-emitter EventEmitter}.
  *
- * - Emitting an event using the {@linkcode log log()}     method.
- * - You can add a listener using the {@linkcode addSink addSink()}  method.
- *
- * @template msg The type of message that this sink can accept
+ * - Emitting an event using the {@linkcode log log()} method.
+ * - You can add a listener using the {@linkcode addSink addSink()} method.
  *
  * @example
- * class MySink extends BaseSink<string> {
+ *   class MySink extends BaseSink<string> {
  *   public override log(msg) {
- *     console.log(msg);
+ *   console.log(msg);
  *   }
- * }
- * // prints "Hello World"
- * new MySink.log("Hello World");
+ *   }
+ *   // prints "Hello World"
+ *   new MySink.log("Hello World");
+ *
+ * @template msg The type of message that this sink can accept
  *
  * @see {@linkcode BaseSink.log BaseSink.log()}
  * @see {@linkcode BaseSink.addSink BaseSink.addSink()}
@@ -52,8 +54,10 @@ export class BaseSink<M> {
   protected sinks: Array<BaseSink<M>> = [];
 
   /**
-   * Runs the {@linkcode log log()}  method of all sinks added to this sink via the {@linkcode addSink addSink()}  method
-   * @param msg message that will be sent to the other sinks
+   * Runs the {@linkcode log log()} method of all sinks added to this sink via
+   * the {@linkcode addSink addSink()} method
+   *
+   * @param msg Message that will be sent to the other sinks
    *
    * @see {@linkcode BaseSink.addSink BaseSink.addSink()}
    * @see {@linkcode BaseSink}
@@ -66,7 +70,8 @@ export class BaseSink<M> {
 
   /**
    * Add sinks that will also be logged to when this sink is logged to
-   * @param sinks will be logged to when this sink is logged to
+   *
+   * @param sinks Will be logged to when this sink is logged to
    *
    * @see {@linkcode BaseSink.log BaseSink.log()}
    * @see {@linkcode BaseSink}
@@ -77,12 +82,17 @@ export class BaseSink<M> {
 }
 
 /**
- * Any messages sent to an instance of Logger will automatically be sent to the {@linkcode ExternalLogger}
- *
- * @template Source where is the logger being used?
+ * Any messages sent to an instance of Logger will automatically be sent to the
+ * {@linkcode ExternalLogger}
  *
  * @example
- * new Logger("lemlink.package-manger.install").log("fatal", 'could not retrieve package "ExampleLib"')
+ *   new Logger("lemlink.package-manger.install").log(
+ *   "fatal",
+ *   'could not retrieve package "ExampleLib"',
+ *   );
+ *
+ * @template Source Where is the logger being used?
+ *
  * @see {@linkcode BaseSink}
  * @see {@linkcode Logger.log Logger.log()}
  *
@@ -92,9 +102,11 @@ export class Logger<Source extends Lowercase<string>> extends BaseSink<
   LogMessage<Source>
 > {
   /**
-   * Any messages sent to an instance of `Logger` will automatically be sent to the {@linkcode ExternalLogger}
+   * Any messages sent to an instance of `Logger` will automatically be sent to
+   * the {@linkcode ExternalLogger}
    *
-   * @param {Source} source where is the logger being used?
+   * @param {Source} source Where is the logger being used?
+   *
    * @see {@linkcode BaseSink}
    * @see {@linkcode Logger}
    *
@@ -106,21 +118,21 @@ export class Logger<Source extends Lowercase<string>> extends BaseSink<
   }
 
   /**
-   * @internal
-   *
    * Sends a message to the {@linkcode ExternalLogger}
    *
-   * @param level the severity of the log message
-   * @param msg message to send to {@linkcode ExternalLogger}
+   * @param level The severity of the log message
+   * @param msg   Message to send to {@linkcode ExternalLogger}
    *
    * @see {@linkcode Logger}
    * @see {@linkcode BaseSink.log BaseSink.log()}
+   *
+   * @internal
    */
   public override log(level: LOG_LEVEL, msg: string): void;
   /**
    * Sends a message to the {@linkcode ExternalLogger}
    *
-   * @param msg message to send to {@linkcode ExternalLogger}
+   * @param msg Message to send to {@linkcode ExternalLogger}
    *
    * @see {@linkcode Logger}
    * @see {@linkcode BaseSink.log BaseSink.log()}
@@ -142,29 +154,31 @@ export class Logger<Source extends Lowercase<string>> extends BaseSink<
 }
 /**
  * Used to listen to the logs output by LemLink
+ *
  * @example
- * class MyLogSink extends BaseSink<string> {
+ *   class MyLogSink extends BaseSink<string> {
  *   public override log(msg) {
- *     console.log(msg);
+ *   console.log(msg);
  *   }
- * }
- * ExternalLogger.addSink(new MyLogSink());
- * // Now, whenever a log is made from LemLink,
- * // it will be logged to the terminal!
+ *   }
+ *   ExternalLogger.addSink(new MyLogSink());
+ *   // Now, whenever a log is made from LemLink,
+ *   // it will be logged to the terminal!
  *
  * @see {@linkcode ExternalLogger.addSink ExternalLogger.addSink()}
  */
 export class ExternalLogger extends BaseSink<LogMessage<string>> {
-  /** singleton instance */
+  /** Singleton instance */
   private static readonly instance: ExternalLogger;
 
-  /** only one instance of ExternalLogger will ever be constructed */
+  /** Only one instance of ExternalLogger will ever be constructed */
   private constructor() {
     super();
   }
 
   /**
    * Used in {@linkcode Logger} to added as a listening sink
+   *
    * @see {@linkcode Logger} constructor
    *
    * @internal
@@ -174,10 +188,11 @@ export class ExternalLogger extends BaseSink<LogMessage<string>> {
   }
 
   /**
-   * Messages are sent from {@link Logger Loggers} to this logger using this method.
-   * This method serves as a wrapper for {@linkcode BaseSink.log() ExternalLogger.instance.log()}
+   * Messages are sent from {@link Logger Loggers} to this logger using this
+   * method. This method serves as a wrapper for
+   * {@linkcode BaseSink.log() ExternalLogger.instance.log()}
    *
-   * @param msg sent from {@link Logger Loggers}
+   * @param msg Sent from {@link Logger Loggers}
    *
    * @see {@linkcode Logger} constructor
    * @see {@linkcode ExternalLogger}
@@ -191,7 +206,8 @@ export class ExternalLogger extends BaseSink<LogMessage<string>> {
 
   /**
    * Add sinks that will also be logged to when this sink is logged to
-   * @param sinks will be logged to when this sink is logged to
+   *
+   * @param sinks Will be logged to when this sink is logged to
    *
    * @see {@linkcode ExternalLogger}
    * @see {@linkcode BaseSink.addSink BaseSink.addSink()}

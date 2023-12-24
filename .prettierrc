@@ -1,1 +1,8 @@
-{}
+{
+  "plugins": ["prettier-plugin-jsdoc"],
+  "jsdocPreferCodeFences": true,
+  "jsdocVerticalAlignment": true,
+  "jsdocSeparateTagGroups": true,
+  "jsdocSeparateReturnsFromParam": true,
+  "jsdocTagsOrder": "{ \"internal\":1000 }"
+}

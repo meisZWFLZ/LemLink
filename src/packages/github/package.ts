@@ -4,12 +4,15 @@ import { GithubPackageVersion } from "./version";
 
 export interface GithubPackageIdentifier {
   /**
-   * does not include @ sign
-   * @example lemlib
+   * Does not include @ sign
+   *
+   * @example
+   *   Lemlib;
    */
   readonly owner: string;
   /**
-   * @example lemlink
+   * @example
+   *   Lemlink;
    */
   readonly repo: string;
 }
