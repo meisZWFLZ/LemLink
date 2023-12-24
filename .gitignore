@@ -6,3 +6,6 @@ out
 
 # npm packages
 *.tgz
+
+# vscode
+.vscode
