@@ -1,20 +1,17 @@
 import { type Octokit } from "octokit";
-import { PackageVersion } from "../package";
 import { type SemVer, parse } from "semver";
 import {
   type GithubPackageIdentifier,
   type GithubPackageReleaseData,
 } from "./package";
 
-export class GithubPackageVersion extends PackageVersion<GithubPackageIdentifier> {
+export class GithubPackageVersion {
   protected constructor(
     protected readonly client: Octokit,
-    packId: GithubPackageIdentifier,
+    public readonly id: GithubPackageIdentifier,
     public readonly data: GithubPackageReleaseData,
-    version: SemVer,
-  ) {
-    super(packId, version);
-  }
+    public readonly version: SemVer,
+  ) {}
 
   public static create(
     client: Octokit,
@@ -30,7 +27,7 @@ export class GithubPackageVersion extends PackageVersion<GithubPackageIdentifier
     return 0;
   }
 
-  public override async download(): Promise<Buffer | undefined> {
+  public async download(): Promise<Buffer | undefined> {
     const index = this.getAssetIndex();
 
     const res = await this.client.rest.repos.getReleaseAsset({
