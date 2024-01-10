@@ -2,12 +2,33 @@ import AdmZip from "adm-zip";
 import { type PackageMetadata } from "./metadata";
 import { type UnknownPackageResolver } from "./package";
 import { LOG_LEVEL, type Logger } from "../logger";
+import { PathScurry, type Path } from "path-scurry";
+
+import { Glob } from "glob";
+import { link, readFileSync } from "fs";
+
+export interface PackageInstallerConfig {
+  /** Where to install packages */
+  readonly targetRoot: string;
+  /** Where to put headers */
+  readonly includePath: string;
+  /** Where to put binaries */
+  readonly firmwarePath: string;
+  /** Where to expand temporary zips */
+  readonly tempPath: string;
+}
 
 /** Responsible for taking a package zip buffer and placing */
 export class PackageInstaller {
+  protected readonly pathScurry = new PathScurry(this.config.targetRoot);
+  protected readonly tempPath = this.pathScurry.root.resolve(
+    this.config.tempPath,
+  );
+
   constructor(
     protected readonly resolvers: UnknownPackageResolver[],
     protected readonly logger: Logger<"package-installer">,
+    protected readonly config: PackageInstallerConfig,
   ) {}
 
   public async install(
@@ -15,15 +36,15 @@ export class PackageInstaller {
     ver: string,
     targetRoot: string,
   ): Promise<void> {
-    const zip = await this.downloadZip(id, ver);
-    if (zip == null) {
+    const packagePath = await this.downloadZip(id, ver);
+    if (packagePath == null) {
       this.logger.log(
         LOG_LEVEL.WARNING,
         `Could not find package: ${id}: ${ver}`,
       );
       return;
     }
-    const metadata = this.getPackageMetadata(zip);
+    const metadata = this.getPackageMetadata(packagePath);
     if (metadata == null) {
       this.logger.log(
         LOG_LEVEL.WARNING,
@@ -48,49 +69,60 @@ export class PackageInstaller {
         (engines as Record<string, string>) ?? {},
         targetRoot,
       ),
-      this.applyPackage({ zip, metadata, targetRoot }),
+      this.applyPackage({ packagePath, metadata, targetRoot }),
     ]);
   }
 
   protected async applyPackage({
-    zip,
+    packagePath,
     metadata,
     targetRoot,
   }: {
-    zip: AdmZip;
+    packagePath: Path;
     metadata: PackageMetadata;
     targetRoot: string;
   }): Promise<void> {
     const runtime = metadata.runtime;
-    await Promise.all([
-      ...(runtime?.bin?.map(async (binPath) => {
-        await this.applyFiles(zip, binPath, targetRoot);
-      }) ?? []),
-      ...(runtime?.headers?.map(async (headerPath) => {
-        await this.applyFiles(zip, headerPath, targetRoot);
-      }) ?? []),
-      ...(metadata?.files?.map(async (filePath) => {
-        await this.applyFiles(zip, filePath, targetRoot);
-      }) ?? []),
-      this.applyFiles(zip, "package.json", targetRoot),
+    await this.applyFiles(packagePath, [
+      ...(runtime?.headers ?? []),
+      ...(runtime?.bin ?? []),
+      ...(metadata?.files ?? []),
+      "package.json",
     ]);
   }
 
-  protected async globify(zip: AdmZip, pathToFiles: string): Promise<string[]> {
-    throw new Error("Not implemented");
-  }
-
   protected async applyFiles(
-    zip: AdmZip,
-    pathToFiles: string,
-    targetPath: string,
+    packagePath: Path,
+    pathGlobs: string[],
   ): Promise<void> {
-    const paths = await this.globify(zip, pathToFiles);
-    await Promise.all(
-      paths.map(async (path) => {
-        zip.extractEntryTo(path, targetPath + path, false, true);
+    const paths = new Glob(pathGlobs, {
+      root: packagePath.fullpath(),
+      withFileTypes: true,
+    });
+    const stream = paths.stream();
+    const promises: Array<Promise<unknown>> = [];
+
+    const tempScurry = new PathScurry(this.config.tempPath);
+
+    stream.on("data", (path) => {
+      if (path.isDirectory()) return;
+      promises.push(
+        new Promise((resolve) => {
+          link(
+            path.fullpath(),
+            this.pathScurry.resolve(tempScurry.relative(path.fullpath())),
+            resolve,
+          );
+        }),
+      );
+    });
+    promises.push(
+      new Promise<void>((resolve) => {
+        stream.on("end", resolve);
       }),
     );
+
+    await Promise.all(promises);
   }
 
   protected validatePackageMetadata(
@@ -111,22 +143,25 @@ export class PackageInstaller {
     );
   }
 
-  protected getPackageMetadata(zip: AdmZip): PackageMetadata | null {
-    const entry = zip.getEntry("package.json");
-    if (entry == null) return null;
-    const buf = zip.readAsText(entry);
-    if (buf == null) return null;
-    return JSON.parse(buf);
+  protected getPackageMetadata(packagePath: Path): PackageMetadata | null {
+    const metaPath = packagePath.child("package.json");
+    if (!metaPath.isFile()) return null;
+    const buf = readFileSync(metaPath.fullpath());
+    return JSON.parse(buf.toString());
   }
 
   protected async downloadZip(
     depId: string,
     ver: string,
-  ): Promise<AdmZip | null> {
+  ): Promise<Path | null> {
     for (const resolver of this.resolvers) {
       const buf = await resolver.resolvePackage(depId, ver);
       if (buf == null) continue;
-      return new AdmZip(buf);
+      const zip = new AdmZip(buf);
+      const dirPathString = this.config.tempPath + `${depId}@${ver}`;
+      const dirPath = this.pathScurry.root.resolve(dirPathString);
+      zip.extractAllTo(dirPath.fullpath(), true);
+      return dirPath;
     }
     return null;
   }
