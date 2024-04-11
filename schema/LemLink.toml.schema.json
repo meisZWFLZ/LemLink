@@ -1,0 +1,306 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LemLink Package Metadata",
+  "type": "object",
+  "definitions": {
+    "package-name": {
+      "description": "Indicates the owner and name of the repo. should be @owner/repo",
+      "examples": ["@lemlib/lemlib", "@unwieldycat/robodash"],
+      "type": "string"
+    },
+    "person": {
+      "$ref": "https://json.schemastore.org/package.json#/definitions/person"
+    },
+    "SemVer": {
+      "title": "Semantic Version",
+      "description": "SemVer is essentially `major.minor.patch`\n\nSee https://semver.org/ for more info",
+      "default": "0.1.0",
+      "type": "string",
+      "format": "semver",
+      "x-taplo": {
+        "link": "https://semver.org/"
+      }
+    },
+    "SemVerRequirement": {
+      "title": "Semantic Version Requirement",
+      "description": "TODO",
+      "default": "*",
+      "type": "string",
+      "format": "semver-requirement"
+    }
+  },
+  "required": ["name", "version"],
+  "properties": {
+    "name": {
+      "$ref": "#/definitions/package-name"
+    },
+    "version": {
+      "$ref": "#/definitions/SemVer"
+    },
+    "description": {
+      "description": "This helps people discover your package, as it's listed in 'npm search'.",
+      "type": "string",
+      "maxLength": 350
+    },
+    "keywords": {
+      "description": "This helps people discover your package as it's listed in 'npm search'.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "homepage": {
+      "description": "The url to the project homepage.",
+      "type": "string"
+    },
+    "bugs": {
+      "description": "The url to your project's issue tracker and / or the email address to which issues should be reported. These are helpful for people who encounter issues with your package.",
+      "type": ["object", "string"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "The url to your project's issue tracker.",
+          "format": "uri"
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address to which issues should be reported.",
+          "format": "email"
+        }
+      }
+    },
+    "license": {
+      "$ref": "https://json.schemastore.org/package.json#/definitions/license",
+      "description": "You should specify a license for your package so that people know how they are permitted to use it, and any restrictions you're placing on it."
+    },
+    "licenses": {
+      "description": "DEPRECATED: Instead, use SPDX expressions, like this: { \"license\": \"ISC\" } or { \"license\": \"(MIT OR Apache-2.0)\" } see: 'https://docs.npmjs.com/files/package.json#license'.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "https://json.schemastore.org/package.json#/definitions/license"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      }
+    },
+    "author": {
+      "$ref": "#/definitions/person"
+    },
+    "contributors": {
+      "description": "A list of people who contributed to this package.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/person"
+      }
+    },
+    "maintainers": {
+      "description": "A list of people who maintains this package.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/person"
+      }
+    },
+    "files": {
+      "description": "The 'files' field is an array of files to include in your project. If you name a folder in the array, then it will also include the files inside that folder.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "type": {
+      "description": "todo",
+      "type": "string",
+      "enum": ["project", "library", "template", "engine"],
+      "default": "project"
+    },
+    "repository": {
+      "description": "Specify the place where your code lives. This is helpful for people who want to contribute.",
+      "type": ["object", "string"],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "directory": {
+          "type": "string"
+        }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/SemVerRequirement"
+      }
+    },
+    "peerDependencies": {
+      "$ref": "https://json.schemastore.org/package.json#/definitions/dependency"
+    },
+    "peerDependenciesMeta": {
+      "description": "When a user installs your package, warnings are emitted if packages specified in \"peerDependencies\" are not already installed. The \"peerDependenciesMeta\" field serves to provide more information on how your peer dependencies are utilized. Most commonly, it allows peer dependencies to be marked as optional. Metadata for this field is specified with a simple hash of the package name to a metadata object.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "optional": {
+            "description": "Specifies that this peer dependency is optional and should not be installed automatically.",
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "overrides": {
+      "description": "Overrides is used to support selective version overrides using npm, which lets you define custom package versions or ranges inside your dependencies. For yarn, use resolutions instead. See: https://docs.npmjs.com/cli/v9/configuring-npm/package-json#overrides",
+      "type": "object"
+    },
+    "engines": {
+      "type": "object",
+      "properties": {
+        "pros": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "private": {
+      "description": "If set to true, then tools should refuse to publish this package.",
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "enum": ["false", "true"]
+        }
+      ]
+    },
+    "runtime": {
+      "type": "object",
+      "properties": {
+        "bin": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "headers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "vex": {
+      "description": "Configuration info specific to the vex v5 platform.",
+      "type": "object",
+      "properties": {
+        "program": {
+          "additionalProperties": false,
+          "description": "Configuration info specific to the vex v5 program.",
+          "type": "object",
+          "properties": {
+            "ports": {
+              "description": "Specifies ports of devices for viewing in the brain's program menu.",
+              "type": "object",
+              "propertyNames": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 21,
+                "$comment": "RESEARCH NEEDED"
+              },
+              "$comment": "RESEARCH NEEDED"
+            },
+            "controllerMapping": {
+              "description": "Specifies the controller mapping for the program. An array of mappings specifies the controller mapping for each of the 2 controllers. A single object specifies the controller mapping for the first controller.",
+              "anyOf": [
+                {
+                  "type": "object"
+                },
+                {
+                  "type": "array",
+                  "minLength": 1,
+                  "maxLength": 2,
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              ]
+            },
+            "slot": {
+              "description": "The slot number on the brain to which the program should be downloaded to.",
+              "type": "integer",
+              "default": 1,
+              "minimum": 1,
+              "maximum": 8
+            },
+            "icon": {
+              "description": "The identifier of the icon to be displayed on the brain.",
+              "enum": [
+                "pros",
+                "pizza",
+                "planet",
+                "alien",
+                "ufo",
+                "clawbot",
+                "robot",
+                "question",
+                "power",
+                "X",
+                "default.bmp"
+              ],
+              "default": "default.bmp",
+              "type": "string"
+            },
+            "version": {
+              "type": "string",
+              "default": "1",
+              "$comment": "RESEARCH NEEDED"
+            },
+            "description": {
+              "description": "The description to be displayed on the brain.",
+              "type": "string"
+            },
+            "iconalt": {
+              "type": "string",
+              "$comment": "RESEARCH NEEDED",
+              "default": ""
+            },
+            "date": {
+              "type": "string",
+              "format": "date",
+              "$comment": "RESEARCH NEEDED"
+            },
+            "timezone": {
+              "type": "string",
+              "$comment": "RESEARCH NEEDED",
+              "default": "0"
+            },
+            "ide": {
+              "description": "Displays under the program type field in the brain's program menu.",
+              "type": "string"
+            },
+            "displayName": {
+              "description": "The name of the program to be displayed on the brain. Defaults to package name.",
+              "type": "string"
+            },
+            "autorun": {
+              "description": "Specifies whether the program should run automatically when the program is downloaded.",
+              "type": "boolean",
+              "default": false
+            }
+          }
+        }
+      }
+    }
+  }
+}

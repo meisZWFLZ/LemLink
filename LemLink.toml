@@ -1,0 +1,37 @@
+#:schema http://127.0.0.1:8080/LemLink.toml.schema.json
+# Example LemLink.toml file
+# run `npx -y http-server schema -p 8080` to make the schema available
+# Uses vscode extension tamasfe.even-better-toml to provide intellisense
+# For schema development, reduce these settings: `evenBetterToml.schema.cache.diskExpiration` and `evenBetterToml.schema.cache.memoryExpiration`
+
+name    = "package name"
+version = "1.2.3"
+
+[vex.program]
+  autorun     = false
+  date        = 1111-11-11           # RESEARCH NEEDED
+  description = "an example program"
+  displayName = "example program"    # defaults to package name
+  icon        = "pros"
+  iconalt     = ""                   # RESEARCH NEEDED
+  ide         = "PROS"
+  slot        = 1
+  timezone    = "0"                  # RESEARCH NEEDED
+  version     = "1"                  # RESEARCH NEEDED
+
+  # throws error "Additional properties are not allowed ('author' was unexpected)""
+  # author      = "author name"
+
+  # displayed config for the first controller (purely aesthetic)
+  [[vex.program.controllerMapping]]
+    L1 = "20" # RESEARCH NEEDED
+    L2 = "19" # RESEARCH NEEDED
+    R1 = "22" # RESEARCH NEEDED
+    R2 = "21" # RESEARCH NEEDED
+
+  # displayed config for the ports (purely aesthetic)
+  [vex.program.ports] # RESEARCH NEEDED
+
+[dependencies]
+  "@lemlib/eigen"  = "0.1.0"
+  "@lemlib/lemlib" = "0.1.0"
