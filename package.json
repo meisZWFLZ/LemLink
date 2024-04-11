@@ -60,6 +60,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
+    "@ltd/j-toml": "^1.38.0",
     "adm-zip": "^0.5.10",
     "glob": "^10.3.10",
     "octokit": "^3.1.2",
