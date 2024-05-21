@@ -77,7 +77,7 @@ export class BaseSink<M> {
    * @see {@linkcode BaseSink}
    */
   public addSink(...sinks: Array<BaseSink<M>>): void {
-    sinks.push(...sinks);
+    this.sinks.push(...sinks);
   }
 }
 
@@ -169,7 +169,7 @@ export class Logger<Source extends Lowercase<string>> extends BaseSink<
  */
 export class ExternalLogger extends BaseSink<LogMessage<string>> {
   /** Singleton instance */
-  private static readonly instance: ExternalLogger;
+  private static readonly instance: ExternalLogger = new ExternalLogger();
 
   /** Only one instance of ExternalLogger will ever be constructed */
   private constructor() {

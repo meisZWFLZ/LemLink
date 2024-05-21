@@ -4,6 +4,8 @@ import { type UnknownPackageResolver } from "./package";
 import { LOG_LEVEL, type Logger } from "../logger";
 import { PathScurry, type Path } from "path-scurry";
 
+import TOML from "@ltd/j-toml";
+
 import { Glob } from "glob";
 import { link, readFileSync } from "fs";
 
@@ -144,7 +146,7 @@ export class PackageInstaller {
   }
 
   protected getPackageMetadata(packagePath: Path): PackageMetadata | null {
-    const metaPath = packagePath.child("package.json");
+    const metaPath = packagePath.resolve("LemLink.toml");
     if (!metaPath.isFile()) return null;
     const buf = readFileSync(metaPath.fullpath());
     return JSON.parse(buf.toString());
@@ -158,8 +160,7 @@ export class PackageInstaller {
       const buf = await resolver.resolvePackage(depId, ver);
       if (buf == null) continue;
       const zip = new AdmZip(buf);
-      const dirPathString = this.config.tempPath + `${depId}@${ver}`;
-      const dirPath = this.pathScurry.root.resolve(dirPathString);
+      const dirPath = this.tempPath.resolve(`${depId}@${ver}`);
       zip.extractAllTo(dirPath.fullpath(), true);
       return dirPath;
     }

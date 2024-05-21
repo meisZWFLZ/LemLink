@@ -12,7 +12,7 @@ export class GithubPackageResolver extends PackageResolver<
   string
 > {
   public idPattern: RegExp =
-    /^@[a-z0-9](?<owner>[a-z0-9]|-(?=[a-z0-9])){0,38}\/(?<repo>[a-z0-9_-\\.]){1,100}$/;
+    /^@(?<owner>[a-z0-9]([a-z0-9]|-(?=[a-z0-9])){0,38})\/(?<repo>([a-z0-9_\-.]){1,100})$/;
 
   public constructor(protected readonly client: Octokit) {
     super();
